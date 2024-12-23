@@ -70,7 +70,7 @@ func handleRandomSleep(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleRandomFail(w http.ResponseWriter, r *http.Request) {
-	if rand.Intn(10) < 5 {
+	if rand.Intn(10) < 7 {
 		http.Error(w, "Random error", http.StatusInternalServerError)
 		return
 	}
