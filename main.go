@@ -59,11 +59,20 @@ type ChatCompletionChunk struct {
 func main() {
 	http.HandleFunc("/v1/chat/completions", handleChatCompletion)
 	http.HandleFunc("/rand_sleep/v1/chat/completions", handleRandomSleep)
+	http.HandleFunc("/rand_fail/v1/chat/completions", handleRandomFail)
 	http.ListenAndServe(":5000", nil)
 }
 
 func handleRandomSleep(w http.ResponseWriter, r *http.Request) {
 	time.Sleep(time.Duration(rand.Intn(5000)) * time.Millisecond)
+	handleChatCompletion(w, r)
+}
+
+func handleRandomFail(w http.ResponseWriter, r *http.Request) {
+	if rand.Intn(10) < 5 {
+		http.Error(w, "Random error", http.StatusInternalServerError)
+		return
+	}
 	handleChatCompletion(w, r)
 }
 
