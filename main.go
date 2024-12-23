@@ -60,6 +60,7 @@ func main() {
 	http.HandleFunc("/v1/chat/completions", handleChatCompletion)
 	http.HandleFunc("/rand_sleep/v1/chat/completions", handleRandomSleep)
 	http.HandleFunc("/rand_fail/v1/chat/completions", handleRandomFail)
+	http.HandleFunc("/rand_all/v1/chat/completions", handleRandom)
 	http.ListenAndServe(":5000", nil)
 }
 
@@ -73,6 +74,15 @@ func handleRandomFail(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Random error", http.StatusInternalServerError)
 		return
 	}
+	handleChatCompletion(w, r)
+}
+
+func handleRandom(w http.ResponseWriter, r *http.Request) {
+	if rand.Intn(10) < 5 {
+		handleRandomFail(w, r)
+		return
+	}
+	time.Sleep(time.Duration(rand.Intn(5000)) * time.Millisecond)
 	handleChatCompletion(w, r)
 }
 
