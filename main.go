@@ -1,7 +1,9 @@
 package main
 
 import (
+	"compress/gzip"
 	"encoding/json"
+	"io"
 	"log/slog"
 	"math/rand"
 	"net/http"
@@ -56,10 +58,25 @@ type ChatCompletionChunk struct {
 
 func main() {
 	http.HandleFunc("/v1/chat/completions", handleChatCompletion)
-	http.ListenAndServe(":3000", nil)
+	http.ListenAndServe(":5000", nil)
 }
 
 func handleChatCompletion(w http.ResponseWriter, r *http.Request) {
+
+	if r.Header.Get("Content-Encoding") == "gzip" {
+		gzipReader, err := gzip.NewReader(r.Body)
+		if err != nil {
+			http.Error(w, "Failed to decompress request body", http.StatusBadRequest)
+			return
+		}
+		defer gzipReader.Close()
+
+		// Replace the request body with the decompressed data
+		r.Body = io.NopCloser(gzipReader)
+	}
+
+	// Continue processing the request
+
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -211,7 +228,7 @@ func writeChunk(w http.ResponseWriter, chunk interface{}) {
 }
 
 func generateResponse(messages []Message) string {
-	return "who are you? and what are you doing here? and what is your purpose? and how can i help you? and what is the meaning of life? and what is the universe and everything? and what is the meaning of death? and what is the purpose of death? and what is the meaning of death? and what is the purpose of death? and and  and"
+	return "who are you? and what are you doing here? and what is your purpose?"
 }
 
 func splitIntoWords(s string) []string {
