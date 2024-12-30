@@ -151,6 +151,9 @@ func handleStreamingResponse(w http.ResponseWriter, req ChatCompletionRequest) {
 	w.Header().Set("Connection", "keep-alive")
 
 	response := generateResponse(req.Messages)
+	for i := 0; i < 10; i++ {
+		response += " " + generateResponse(req.Messages)
+	}
 	id := "chatcmpl-" + randomString(10)
 	created := time.Now().Unix()
 
